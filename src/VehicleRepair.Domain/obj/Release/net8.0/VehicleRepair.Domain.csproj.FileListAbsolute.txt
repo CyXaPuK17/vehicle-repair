@@ -1,0 +1,11 @@
+/home/user/vehicle-repair/src/VehicleRepair.Domain/bin/Release/net8.0/VehicleRepair.Domain.deps.json
+/home/user/vehicle-repair/src/VehicleRepair.Domain/bin/Release/net8.0/VehicleRepair.Domain.dll
+/home/user/vehicle-repair/src/VehicleRepair.Domain/bin/Release/net8.0/VehicleRepair.Domain.pdb
+/home/user/vehicle-repair/src/VehicleRepair.Domain/obj/Release/net8.0/VehicleRepair.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/home/user/vehicle-repair/src/VehicleRepair.Domain/obj/Release/net8.0/VehicleRepair.Domain.AssemblyInfoInputs.cache
+/home/user/vehicle-repair/src/VehicleRepair.Domain/obj/Release/net8.0/VehicleRepair.Domain.AssemblyInfo.cs
+/home/user/vehicle-repair/src/VehicleRepair.Domain/obj/Release/net8.0/VehicleRepair.Domain.csproj.CoreCompileInputs.cache
+/home/user/vehicle-repair/src/VehicleRepair.Domain/obj/Release/net8.0/VehicleRepair.Domain.dll
+/home/user/vehicle-repair/src/VehicleRepair.Domain/obj/Release/net8.0/refint/VehicleRepair.Domain.dll
+/home/user/vehicle-repair/src/VehicleRepair.Domain/obj/Release/net8.0/VehicleRepair.Domain.pdb
+/home/user/vehicle-repair/src/VehicleRepair.Domain/obj/Release/net8.0/ref/VehicleRepair.Domain.dll

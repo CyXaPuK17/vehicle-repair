@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "LG1FHmUx5qE=",
+  "success": true,
+  "projectFilePath": "/home/user/vehicle-repair/src/VehicleRepair.Application/VehicleRepair.Application.csproj",
+  "expectedPackageFiles": [
+    "/home/user/.nuget/packages/fluentvalidation/11.9.0/fluentvalidation.11.9.0.nupkg.sha512",
+    "/home/user/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

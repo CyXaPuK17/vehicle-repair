@@ -1,0 +1,23 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using VehicleRepair.Domain.Entities;
+
+namespace VehicleRepair.Infrastructure.Persistence.Configurations;
+
+public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
+{
+    public void Configure(EntityTypeBuilder<Customer> builder)
+    {
+        builder.HasKey(c => c.Id);
+        builder.Property(c => c.INN).IsRequired().HasMaxLength(12);
+        builder.HasIndex(c => c.INN).IsUnique();
+        builder.Property(c => c.Name).IsRequired().HasMaxLength(500);
+        builder.Property(c => c.ContactPerson).HasMaxLength(200);
+        builder.Property(c => c.Phone).HasMaxLength(30);
+        builder.Property(c => c.Email).HasMaxLength(200);
+        builder.Property(c => c.CreatedAt).HasDefaultValueSql("NOW()");
+
+        builder.HasMany(c => c.Vehicles).WithOne(v => v.Customer)
+            .HasForeignKey(v => v.CustomerId).OnDelete(DeleteBehavior.Restrict);
+    }
+}

@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: vehicle_repair
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d vehicle_repair"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=vehicle_repair;Username=postgres;Password=postgres
+      Jwt__Secret: change-me-to-a-long-random-secret-at-least-32-chars!!
+      Jwt__Issuer: VehicleRepairAPI
+      Jwt__Audience: VehicleRepairClients
+      Jwt__ExpiryMinutes: "15"
+      Cors__Origins: http://localhost
+      Seed__AdminLogin: admin
+      Seed__AdminPassword: Admin123!
+      Seed__ManagerLogin: uk_manager
+      Seed__ManagerPassword: Manager123!
+    depends_on:
+      db:
+        condition: service_healthy
+    # Uncomment to access Swagger directly: http://localhost:5000/swagger
+    # ports:
+    #   - "5000:8080"
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
