@@ -8,14 +8,20 @@ namespace VehicleRepair.API.Controllers;
 
 [ApiController]
 [Route("api/v1/dashboard")]
-[Authorize(Roles = "ManagementCompany")]
+[Authorize]
 public class DashboardController : ControllerBase
 {
     private readonly GetDashboardUseCase _useCase;
+    private readonly GetCustomerDashboardUseCase _customerUseCase;
 
-    public DashboardController(GetDashboardUseCase useCase) => _useCase = useCase;
+    public DashboardController(GetDashboardUseCase useCase, GetCustomerDashboardUseCase customerUseCase)
+    {
+        _useCase = useCase;
+        _customerUseCase = customerUseCase;
+    }
 
     [HttpGet]
+    [Authorize(Roles = "ManagementCompany")]
     public async Task<IActionResult> Get(
         [FromQuery] DateTime? from,
         [FromQuery] DateTime? to,
@@ -27,4 +33,9 @@ public class DashboardController : ControllerBase
         var toDate   = to?.ToUniversalTime()   ?? now;
         return Ok(ApiResponse<DashboardDto>.Ok(await _useCase.ExecuteAsync(fromDate, toDate, topCount, ct)));
     }
+
+    [HttpGet("customer")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> GetCustomer(CancellationToken ct) =>
+        Ok(ApiResponse<CustomerDashboardDto>.Ok(await _customerUseCase.ExecuteAsync(ct)));
 }
