@@ -95,6 +95,19 @@ export interface UserDto {
   createdAt: string;
 }
 
+export interface ProfileDto {
+  login: string;
+  role: UserRole;
+  name?: string;
+  inn?: string;
+  contactPerson?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  lastLoginAt?: string;
+  createdAt: string;
+}
+
 export interface ReportByCustomerDto {
   rows: ReportByCustomerRow[];
   totalCount: number;

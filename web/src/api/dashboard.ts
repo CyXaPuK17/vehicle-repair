@@ -11,5 +11,14 @@ export interface DashboardDto {
   topExecutors: ExecutorStatDto[];
 }
 
+export interface CustomerDashboardDto {
+  vehicleCount: number;
+  activeRepairs: number;
+  spentForYear: number;
+}
+
 export const getDashboard = (from: string, to: string, topCount: number) =>
   api.get<ApiResponse<DashboardDto>>('/dashboard', { params: { from, to, topCount } });
+
+export const getCustomerDashboard = () =>
+  api.get<ApiResponse<CustomerDashboardDto>>('/dashboard/customer');

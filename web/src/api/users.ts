@@ -1,5 +1,5 @@
 import api from './client';
-import type { ApiResponse, UserDto, UserRole } from '../types';
+import type { ApiResponse, UserDto, UserRole, ProfileDto } from '../types';
 
 export const getUsers = () => api.get<ApiResponse<UserDto[]>>('/users');
 export const createUser = (data: {
@@ -19,3 +19,12 @@ export const updateUser = (id: string, data: {
 }) => api.put<ApiResponse<string>>(`/users/${id}`, data);
 export const setUserActive = (id: string, isActive: boolean) =>
   api.patch<ApiResponse<string>>(`/users/${id}/active`, { isActive });
+export const getMyProfile = () =>
+  api.get<ApiResponse<ProfileDto>>('/users/me/profile');
+export const updateMyProfile = (data: {
+  name?: string;
+  contactPerson?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+}) => api.patch<ApiResponse<string>>('/users/me/profile', data);

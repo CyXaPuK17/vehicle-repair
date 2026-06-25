@@ -1,15 +1,17 @@
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, theme } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import axios from 'axios';
 import { router } from './router';
 import { useAuthStore } from './store/authStore';
+import { useThemeStore } from './store/themeStore';
 import type { UserRole } from './types';
 
 export default function App() {
   const setAuth = useAuthStore(s => s.setAuth);
   const setInitializing = useAuthStore(s => s.setInitializing);
+  const isDark = useThemeStore(s => s.isDark);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -36,7 +38,7 @@ export default function App() {
   }, []);
 
   return (
-    <ConfigProvider locale={ruRU}>
+    <ConfigProvider locale={ruRU} theme={{ algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm }}>
       <RouterProvider router={router} />
     </ConfigProvider>
   );

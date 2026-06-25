@@ -3,7 +3,7 @@ import { useAuthStore } from '../../store/authStore';
 
 export default function RoleRedirect() {
   const role = useAuthStore(s => s.role);
-  if (role === 'Customer') return <Navigate to="/active-repairs" replace />;
+  if (role === 'Customer') return <Navigate to="/customer-dashboard" replace />;
   if (role === 'Executor') return <Navigate to="/queue" replace />;
   return <Navigate to="/dashboard" replace />;
 }

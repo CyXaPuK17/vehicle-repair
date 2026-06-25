@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Button, Typography, Space, Dropdown, Modal, Form, Input, message } from 'antd';
+import { Layout, Menu, Button, Typography, Space, Dropdown, Modal, Form, Input, message, theme } from 'antd';
 import {
   FileTextOutlined, TeamOutlined, CarOutlined, ToolOutlined,
   UserOutlined, LogoutOutlined, BarChartOutlined, DashboardOutlined,
   UnorderedListOutlined, FileSearchOutlined, KeyOutlined, DownOutlined,
+  SunOutlined, MoonOutlined, IdcardOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/authStore';
+import { useThemeStore } from '../../store/themeStore';
 import { logout } from '../../api/auth';
 import { changePassword } from '../../api/users';
 
@@ -20,6 +22,8 @@ const roleLabel: Record<string, string> = {
 
 export default function AppLayout() {
   const { role, logout: clearAuth } = useAuthStore();
+  const { isDark, toggle } = useThemeStore();
+  const { token } = theme.useToken();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -55,6 +59,7 @@ export default function AppLayout() {
 
   const menuItems = [
     ...(isUK ? [{ key: '/dashboard', icon: <DashboardOutlined />, label: 'Главная' }] : []),
+    ...(isCustomer ? [{ key: '/customer-dashboard', icon: <DashboardOutlined />, label: 'Главная' }] : []),
     ...(isUK ? [{ key: '/repairs', icon: <FileSearchOutlined />, label: 'Ремонты' }] : []),
     ...(isExecutor ? [{ key: '/queue', icon: <UnorderedListOutlined />, label: 'Мои задания' }] : []),
     ...(isCustomer ? [{ key: '/active-repairs', icon: <CarOutlined />, label: 'Текущие ремонты' }] : []),
@@ -74,11 +79,13 @@ export default function AppLayout() {
 
   const userMenu = {
     items: [
+      { key: 'profile', icon: <IdcardOutlined />, label: 'Профиль' },
       { key: 'pwd', icon: <KeyOutlined />, label: 'Сменить пароль' },
       { type: 'divider' as const },
       { key: 'logout', icon: <LogoutOutlined />, label: 'Выйти', danger: true },
     ],
     onClick: ({ key }: { key: string }) => {
+      if (key === 'profile') navigate('/profile');
       if (key === 'pwd') setPwdOpen(true);
       if (key === 'logout') handleLogout();
     },
@@ -86,8 +93,8 @@ export default function AppLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider width={220} theme="light" style={{ borderRight: '1px solid #f0f0f0' }}>
-        <div style={{ padding: '16px', fontWeight: 700, fontSize: 15, borderBottom: '1px solid #f0f0f0' }}>
+      <Sider width={220} theme={isDark ? 'dark' : 'light'} style={{ borderRight: `1px solid ${token.colorBorderSecondary}` }}>
+        <div style={{ padding: '16px', fontWeight: 700, fontSize: 15, borderBottom: `1px solid ${token.colorBorderSecondary}`, color: token.colorText }}>
           Учёт ремонтов ТС
         </div>
         <Menu
@@ -99,15 +106,21 @@ export default function AppLayout() {
         />
       </Sider>
       <Layout>
-        <Header style={{ background: '#fff', borderBottom: '1px solid #f0f0f0', padding: '0 24px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+        <Header style={{ background: token.colorBgContainer, borderBottom: `1px solid ${token.colorBorderSecondary}`, padding: '0 24px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 }}>
+          <Button
+            type="text"
+            icon={isDark ? <SunOutlined /> : <MoonOutlined />}
+            onClick={toggle}
+            title={isDark ? 'Светлая тема' : 'Тёмная тема'}
+          />
           <Dropdown menu={userMenu} trigger={['click']}>
             <Space style={{ cursor: 'pointer' }}>
               <Typography.Text type="secondary">{role ? roleLabel[role] : ''}</Typography.Text>
-              <DownOutlined style={{ fontSize: 10, color: '#999' }} />
+              <DownOutlined style={{ fontSize: 10, color: token.colorTextTertiary }} />
             </Space>
           </Dropdown>
         </Header>
-        <Content style={{ padding: 24, background: '#f5f5f5' }}>
+        <Content style={{ padding: 24, background: token.colorBgLayout }}>
           <Outlet />
         </Content>
       </Layout>
