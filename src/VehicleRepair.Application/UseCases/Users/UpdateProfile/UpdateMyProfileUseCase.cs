@@ -37,6 +37,10 @@ public class UpdateMyProfileUseCase
             executor.Email   = request.Email   ?? executor.Email;
             _uow.Executors.Update(executor);
         }
+        else
+        {
+            return;
+        }
 
         await _uow.SaveChangesAsync(ct);
     }

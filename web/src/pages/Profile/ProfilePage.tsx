@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, Form, Input, Button, Descriptions, Typography, Spin, message, Divider } from 'antd';
+import { Card, Form, Input, Button, Descriptions, Typography, Spin, Alert, message, Divider } from 'antd';
 import { UserOutlined, EditOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
 import { getMyProfile, updateMyProfile } from '../../api/users';
 import type { ProfileDto } from '../../types';
@@ -14,16 +14,20 @@ const roleLabel: Record<string, string> = {
 export default function ProfilePage() {
   const [profile, setProfile] = useState<ProfileDto | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
 
-  const hasLinkedEntity = profile?.name !== undefined && profile?.name !== null;
+  const hasLinkedEntity = profile?.name != null;
 
   const load = async () => {
     try {
       const res = await getMyProfile();
       setProfile(res.data.data!);
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } }; message?: string };
+      setError(err?.response?.data?.message ?? err?.message ?? 'Ошибка загрузки профиля');
     } finally {
       setLoading(false);
     }
@@ -62,9 +66,8 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) {
-    return <Spin style={{ display: 'block', marginTop: 80 }} />;
-  }
+  if (loading) return <Spin style={{ display: 'block', marginTop: 80 }} />;
+  if (error) return <Alert type="error" message="Ошибка" description={error} showIcon style={{ maxWidth: 500 }} />;
 
   return (
     <div style={{ maxWidth: 640 }}>

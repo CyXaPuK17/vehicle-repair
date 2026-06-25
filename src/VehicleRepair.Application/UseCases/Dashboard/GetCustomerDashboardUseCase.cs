@@ -21,13 +21,18 @@ public class GetCustomerDashboardUseCase
         var customerId = _currentUser.LinkedEntityId
             ?? throw new ForbiddenException("Профиль клиента не привязан к учётной записи.");
 
-        var vehicles = await _uow.Vehicles.GetByCustomerIdAsync(customerId, ct);
-
-        var activeRepairs = await _uow.Repairs.GetActiveByCustomerIdAsync(customerId, ct);
-
         var now = DateTime.UtcNow;
         var yearStart = new DateTime(now.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        var yearRepairs = await _uow.Repairs.GetByCustomerIdAsync(customerId, yearStart, now, ct);
+
+        var vehiclesTask     = _uow.Vehicles.GetByCustomerIdAsync(customerId, ct);
+        var activeTask       = _uow.Repairs.GetActiveByCustomerIdAsync(customerId, ct);
+        var yearRepairsTask  = _uow.Repairs.GetByCustomerIdAsync(customerId, yearStart, now, ct);
+
+        await Task.WhenAll(vehiclesTask, activeTask, yearRepairsTask);
+
+        var vehicles     = vehiclesTask.Result;
+        var activeRepairs = activeTask.Result;
+        var yearRepairs  = yearRepairsTask.Result;
 
         return new CustomerDashboardDto(
             vehicles.Count,

@@ -138,7 +138,7 @@ export const router = createBrowserRouter([
           </RequireAuth>
         ),
       },
-      { path: 'profile', element: <ProfilePage /> },
+      { path: 'profile', element: <RequireAuth><ProfilePage /></RequireAuth> },
       { path: '403', element: <div style={{ padding: 32 }}><h2>403 — Доступ запрещён</h2></div> },
     ],
   },
