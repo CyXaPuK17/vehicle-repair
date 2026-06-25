@@ -1,5 +1,6 @@
 using VehicleRepair.Application.Common.Interfaces;
 using VehicleRepair.Application.DTOs.Users;
+using VehicleRepair.Domain.Exceptions;
 using VehicleRepair.Domain.Interfaces;
 
 namespace VehicleRepair.Application.UseCases.Users.GetCurrent;
@@ -18,7 +19,7 @@ public class GetCurrentUserUseCase
     public async Task<UserDto> ExecuteAsync(CancellationToken ct)
     {
         var user = await _uow.Users.GetWithDetailsAsync(_currentUser.UserId, ct)
-            ?? throw new KeyNotFoundException();
+            ?? throw new NotFoundException("User", _currentUser.UserId);
         return new UserDto(
             user.Id, user.Login, user.Role,
             user.CustomerId, user.ExecutorId,

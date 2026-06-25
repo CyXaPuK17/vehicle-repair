@@ -26,8 +26,10 @@ using VehicleRepair.Application.UseCases.Users.ChangePassword;
 using VehicleRepair.Application.UseCases.Users.Create;
 using VehicleRepair.Application.UseCases.Users.GetAll;
 using VehicleRepair.Application.UseCases.Users.GetCurrent;
+using VehicleRepair.Application.UseCases.Users.GetProfile;
 using VehicleRepair.Application.UseCases.Users.SetActive;
 using VehicleRepair.Application.UseCases.Users.Update;
+using VehicleRepair.Application.UseCases.Users.UpdateProfile;
 using VehicleRepair.Application.UseCases.Vehicles.Create;
 using VehicleRepair.Application.UseCases.Vehicles.GetAll;
 using VehicleRepair.Application.UseCases.Vehicles.GetHistory;
@@ -68,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<GetAllRepairsUseCase>();
 
         services.AddScoped<GetDashboardUseCase>();
+        services.AddScoped<GetCustomerDashboardUseCase>();
 
         services.AddScoped<ReportByCustomerUseCase>();
         services.AddScoped<ReportByExecutorUseCase>();
@@ -80,6 +83,8 @@ public static class DependencyInjection
         services.AddScoped<GetAllUsersUseCase>();
         services.AddScoped<ChangePasswordUseCase>();
         services.AddScoped<SetUserActiveUseCase>();
+        services.AddScoped<GetMyProfileUseCase>();
+        services.AddScoped<UpdateMyProfileUseCase>();
 
         return services;
     }
