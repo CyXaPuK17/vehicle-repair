@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Typography, Select, Form, DatePicker, Space, Tag } from 'antd';
+import { Table, Card, Typography, Select, Form, DatePicker, Space, Tag, Input, theme } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
+import { SearchOutlined } from '@ant-design/icons';
 import { getRepairs } from '../../api/repairs';
 import type { RepairDto, RepairStatus } from '../../types';
 import { RepairStatusTag, REPAIR_STATUS_OPTIONS } from '../../utils/repairStatus';
@@ -38,8 +39,10 @@ const columns: ColumnsType<RepairDto> = [
 ];
 
 export default function RepairsPage() {
+  const { token } = theme.useToken();
   const [allRows, setAllRows]       = useState<RepairDto[]>([]);
   const [statusFilter, setStatusFilter] = useState<RepairStatus[]>([]);
+  const [search, setSearch]         = useState('');
   const [loading, setLoading]       = useState(false);
   const [range, setRange]           = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
     dayjs().startOf('year'), dayjs(),
@@ -53,13 +56,17 @@ export default function RepairsPage() {
       .finally(() => setLoading(false));
   }, [range]);
 
-  const rows = statusFilter.length
+  const byStatus = statusFilter.length
     ? allRows.filter(r => statusFilter.includes(r.status))
     : allRows;
+  const q = search.toLowerCase();
+  const rows = q
+    ? byStatus.filter(r => [r.licensePlate, r.vehicleMakeModel, r.customerName, r.executorName, r.repairTypeName].some(v => v?.toLowerCase().includes(q)))
+    : byStatus;
 
   return (
     <Card title={<Typography.Title level={4} style={{ margin: 0 }}>Ремонты</Typography.Title>}>
-      <Form layout="inline" style={{ marginBottom: 16 }}>
+      <Form layout="inline" style={{ marginBottom: 12 }}>
         <Form.Item>
           <RangePicker
             format="DD.MM.YYYY"
@@ -78,7 +85,15 @@ export default function RepairsPage() {
           />
         </Form.Item>
       </Form>
-      {!loading && allRows.length > 0 && statusFilter.length > 0 && (
+      <Input
+        prefix={<SearchOutlined />}
+        placeholder="Поиск по гос. номеру, ТС, заказчику, исполнителю, виду ремонта..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        allowClear
+        style={{ marginBottom: 12 }}
+      />
+      {!loading && allRows.length > 0 && (statusFilter.length > 0 || search) && (
         <Space style={{ marginBottom: 12 }}>
           <Typography.Text type="secondary">
             Показано: {rows.length} из {allRows.length}
@@ -94,6 +109,14 @@ export default function RepairsPage() {
         pagination={PAGINATION}
         showSorterTooltip={false}
         scroll={{ x: 1000 }}
+        expandable={{
+          expandedRowRender: (r) => (
+            <Typography.Text style={{ paddingLeft: 8, color: token.colorTextSecondary }}>
+              {r.comment}
+            </Typography.Text>
+          ),
+          rowExpandable: (r) => !!r.comment,
+        }}
       />
     </Card>
   );

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Typography, Tag, Row, Col, Statistic } from 'antd';
+import { Table, Card, Typography, Tag, Row, Col, Statistic, Input, theme } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import { SyncOutlined, CheckCircleOutlined, CalendarOutlined, DollarOutlined } from '@ant-design/icons';
+import { SyncOutlined, CheckCircleOutlined, CalendarOutlined, DollarOutlined, SearchOutlined } from '@ant-design/icons';
 import { getRepairs } from '../../api/repairs';
 import { getMyStats, type ExecutorStatsDto } from '../../api/executors';
 import type { RepairDto, RepairStatus } from '../../types';
@@ -37,7 +37,9 @@ const monthName = now.format('MMMM');
 const yearNum   = now.year();
 
 export default function QueuePage() {
+  const { token } = theme.useToken();
   const [rows,    setRows]    = useState<RepairDto[]>([]);
+  const [search,  setSearch]  = useState('');
   const [stats,   setStats]   = useState<ExecutorStatsDto | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,6 +52,11 @@ export default function QueuePage() {
         .catch(() => {}),
     ]).finally(() => setLoading(false));
   }, []);
+
+  const q = search.toLowerCase();
+  const filtered = q
+    ? rows.filter(r => [r.licensePlate, r.vehicleMakeModel, r.customerName, r.repairTypeName].some(v => v?.toLowerCase().includes(q)))
+    : rows;
 
   return (
     <>
@@ -123,14 +130,30 @@ export default function QueuePage() {
           )}
         </Typography.Title>
       }>
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="Поиск по гос. номеру, ТС, заказчику, виду ремонта..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          allowClear
+          style={{ marginBottom: 12 }}
+        />
         <Table
-          dataSource={rows}
+          dataSource={filtered}
           columns={columns}
           rowKey="id"
           loading={loading}
           size="small"
           pagination={PAGINATION}
           showSorterTooltip={false}
+          expandable={{
+            expandedRowRender: (r) => (
+              <Typography.Text style={{ paddingLeft: 8, color: token.colorTextSecondary }}>
+                {r.comment}
+              </Typography.Text>
+            ),
+            rowExpandable: (r) => !!r.comment,
+          }}
         />
       </Card>
     </>

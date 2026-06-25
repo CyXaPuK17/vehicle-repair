@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Table, Card, Button, Modal, Form, Input, Switch, Typography, message, Space } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { getExecutors, createExecutor, updateExecutor } from '../../api/executors';
 import type { ExecutorDto } from '../../types';
@@ -13,6 +13,7 @@ export default function ExecutorsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<ExecutorDto | null>(null);
   const [form] = Form.useForm();
+  const [search, setSearch] = useState('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [bulkLoading, setBulkLoading] = useState(false);
 
@@ -85,6 +86,11 @@ export default function ExecutorsPage() {
     },
   ];
 
+  const q = search.toLowerCase();
+  const filtered = q
+    ? executors.filter(e => [e.inn, e.name, e.address, e.phone, e.email].some(v => v?.toLowerCase().includes(q)))
+    : executors;
+
   const selectedItems = executors.filter(e => selectedRowKeys.includes(e.id));
   const bulkBar = selectedRowKeys.length > 0 && (
     <Space>
@@ -104,8 +110,16 @@ export default function ExecutorsPage() {
         </Space>
       }
     >
+      <Input
+        prefix={<SearchOutlined />}
+        placeholder="Поиск по ИНН, названию, адресу, телефону, email..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        allowClear
+        style={{ marginBottom: 12 }}
+      />
       <Table
-        dataSource={executors}
+        dataSource={filtered}
         columns={columns}
         rowKey="id"
         loading={loading}

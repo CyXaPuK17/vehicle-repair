@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Table, Card, Button, Modal, Form, Input, Switch, Typography, message, Space } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { getCustomers, createCustomer, updateCustomer } from '../../api/customers';
 import type { CustomerDto } from '../../types';
@@ -13,6 +13,7 @@ export default function CustomersPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<CustomerDto | null>(null);
   const [form] = Form.useForm();
+  const [search, setSearch] = useState('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [bulkLoading, setBulkLoading] = useState(false);
 
@@ -81,6 +82,11 @@ export default function CustomersPage() {
     },
   ];
 
+  const q = search.toLowerCase();
+  const filtered = q
+    ? customers.filter(c => [c.inn, c.name, c.contactPerson, c.phone, c.email].some(v => v?.toLowerCase().includes(q)))
+    : customers;
+
   const selectedItems = customers.filter(c => selectedRowKeys.includes(c.id));
   const bulkBar = selectedRowKeys.length > 0 && (
     <Space>
@@ -100,8 +106,16 @@ export default function CustomersPage() {
         </Space>
       }
     >
+      <Input
+        prefix={<SearchOutlined />}
+        placeholder="Поиск по ИНН, названию, контакту, телефону, email..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        allowClear
+        style={{ marginBottom: 12 }}
+      />
       <Table
-        dataSource={customers}
+        dataSource={filtered}
         columns={columns}
         rowKey="id"
         loading={loading}

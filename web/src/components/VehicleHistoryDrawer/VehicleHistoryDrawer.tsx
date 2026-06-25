@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Drawer, Table, Tag, Typography, Alert, Spin } from 'antd';
+import { Drawer, Table, Tag, Typography, Alert, Spin, theme } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { getVehicleHistory } from '../../api/vehicles';
@@ -38,6 +38,7 @@ interface Props {
 }
 
 export default function VehicleHistoryDrawer({ vehicleId, title, onClose }: Props) {
+  const { token } = theme.useToken();
   const [rows, setRows]     = useState<RepairDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError]   = useState<string | null>(null);
@@ -83,6 +84,14 @@ export default function VehicleHistoryDrawer({ vehicleId, title, onClose }: Prop
             pagination={{ pageSize: 10, showSizeChanger: false, hideOnSinglePage: true }}
             showSorterTooltip={false}
             locale={{ emptyText: 'Ремонтов нет' }}
+            expandable={{
+              expandedRowRender: (r) => (
+                <Typography.Text style={{ paddingLeft: 8, color: token.colorTextSecondary }}>
+                  {r.comment}
+                </Typography.Text>
+              ),
+              rowExpandable: (r) => !!r.comment,
+            }}
           />
         </>
       )}

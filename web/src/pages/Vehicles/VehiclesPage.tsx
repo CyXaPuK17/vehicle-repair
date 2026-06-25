@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Table, Card, Button, Modal, Form, Input, Select, InputNumber, Switch, Typography, message, Space } from 'antd';
-import { PlusOutlined, EditOutlined, HistoryOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { getVehicles, createVehicle, updateVehicle } from '../../api/vehicles';
 import { getCustomers } from '../../api/customers';
@@ -24,6 +24,7 @@ export default function VehiclesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<VehicleDto | null>(null);
   const [form] = Form.useForm();
+  const [search, setSearch] = useState('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [historyVehicle, setHistoryVehicle] = useState<VehicleDto | null>(null);
@@ -123,6 +124,11 @@ export default function VehiclesPage() {
     },
   ];
 
+  const q = search.toLowerCase();
+  const filtered = q
+    ? vehicles.filter(v => [v.licensePlate, v.make, v.model, v.vin, v.customerName].some(f => f?.toLowerCase().includes(q)))
+    : vehicles;
+
   const selectedItems = vehicles.filter(v => selectedRowKeys.includes(v.id));
   const bulkBar = selectedRowKeys.length > 0 && (
     <Space>
@@ -142,8 +148,16 @@ export default function VehiclesPage() {
         </Space>
       }
     >
+      <Input
+        prefix={<SearchOutlined />}
+        placeholder="Поиск по гос. номеру, марке, модели, VIN, заказчику..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        allowClear
+        style={{ marginBottom: 12 }}
+      />
       <Table
-        dataSource={vehicles}
+        dataSource={filtered}
         columns={columns}
         rowKey="id"
         loading={loading}
