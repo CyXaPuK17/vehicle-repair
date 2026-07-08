@@ -24,15 +24,10 @@ public class GetCustomerDashboardUseCase
         var now = DateTime.UtcNow;
         var yearStart = new DateTime(now.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        var vehiclesTask     = _uow.Vehicles.GetByCustomerIdAsync(customerId, ct);
-        var activeTask       = _uow.Repairs.GetActiveByCustomerIdAsync(customerId, ct);
-        var yearRepairsTask  = _uow.Repairs.GetByCustomerIdAsync(customerId, yearStart, now, ct);
-
-        await Task.WhenAll(vehiclesTask, activeTask, yearRepairsTask);
-
-        var vehicles     = vehiclesTask.Result;
-        var activeRepairs = activeTask.Result;
-        var yearRepairs  = yearRepairsTask.Result;
+        // EF Core's DbContext doesn't support concurrent operations, so these must run sequentially, not via Task.WhenAll.
+        var vehicles      = await _uow.Vehicles.GetByCustomerIdAsync(customerId, ct);
+        var activeRepairs = await _uow.Repairs.GetActiveByCustomerIdAsync(customerId, ct);
+        var yearRepairs   = await _uow.Repairs.GetByCustomerIdAsync(customerId, yearStart, now, ct);
 
         return new CustomerDashboardDto(
             vehicles.Count,
