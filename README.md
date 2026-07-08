@@ -125,9 +125,9 @@ wsl -d <ваш-дистрибутив> -u root -- bash -c "curl -fsSL https://ge
 dotnet test VehicleRepair.sln
 ```
 
-## Что я устанавливал на этой машине с нуля
+## Что я устанавливал на машине с нуля
 
-Для запуска проекта на этом ПК (Windows, чистая машина без .NET/Node/PostgreSQL/Docker) были установлены:
+Для запуска проекта на ПК (Windows, чистая машина без .NET/Node/PostgreSQL/Docker) были установлены:
 
 1. **.NET 8 SDK** — нативно на Windows, через winget:
    ```powershell
