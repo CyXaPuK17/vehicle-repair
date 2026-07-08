@@ -23,3 +23,9 @@ export const updateRepair = (id: string, data: {
 
 export const issueRepair = (id: string, issuedAt: string) =>
   api.patch<ApiResponse<string>>(`/repairs/${id}/issue`, { issuedAt });
+
+export const startRepair = (id: string) =>
+  api.patch<ApiResponse<string>>(`/repairs/${id}/start`);
+
+export const completeRepair = (id: string) =>
+  api.patch<ApiResponse<string>>(`/repairs/${id}/complete`);

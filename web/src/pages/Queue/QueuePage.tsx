@@ -1,36 +1,41 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Typography, Tag, Row, Col, Statistic, Input, theme } from 'antd';
+import { Table, Card, Typography, Tag, Row, Col, Statistic, Input, theme, Button, Popconfirm, DatePicker, Space, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 import { SyncOutlined, CheckCircleOutlined, CalendarOutlined, DollarOutlined, SearchOutlined } from '@ant-design/icons';
-import { getRepairs } from '../../api/repairs';
+import { getRepairs, startRepair, completeRepair, issueRepair } from '../../api/repairs';
 import { getMyStats, type ExecutorStatsDto } from '../../api/executors';
 import type { RepairDto, RepairStatus } from '../../types';
 import { RepairStatusTag } from '../../utils/repairStatus';
 import { PAGINATION } from '../../utils/pagination';
 
-const columns: ColumnsType<RepairDto> = [
-  { title: 'Гос. номер', dataIndex: 'licensePlate', width: 110, sorter: (a, b) => a.licensePlate.localeCompare(b.licensePlate) },
-  { title: 'ТС', dataIndex: 'vehicleMakeModel', sorter: (a, b) => a.vehicleMakeModel.localeCompare(b.vehicleMakeModel) },
-  { title: 'Заказчик', dataIndex: 'customerName', sorter: (a, b) => a.customerName.localeCompare(b.customerName) },
-  { title: 'Вид ремонта', dataIndex: 'repairTypeName', sorter: (a, b) => a.repairTypeName.localeCompare(b.repairTypeName) },
-  {
-    title: 'Статус', dataIndex: 'status', width: 110,
-    sorter: (a, b) => a.status.localeCompare(b.status),
-    render: (v: RepairStatus) => <RepairStatusTag status={v} />,
-  },
-  {
-    title: 'Дата приёмки', dataIndex: 'receivedAt', width: 120,
-    defaultSortOrder: 'descend',
-    sorter: (a, b) => new Date(a.receivedAt).getTime() - new Date(b.receivedAt).getTime(),
-    render: (v: string) => dayjs(v).format('DD.MM.YYYY'),
-  },
-  {
-    title: 'Стоимость', dataIndex: 'cost', width: 130, align: 'right',
-    sorter: (a, b) => a.cost - b.cost,
-    render: (v: number) => `${v.toLocaleString('ru', { minimumFractionDigits: 2 })} ₽`,
-  },
-];
+function IssueAction({ repair, onIssued }: { repair: RepairDto; onIssued: () => void }) {
+  const [issuedAt, setIssuedAt] = useState<Dayjs>(() => dayjs());
+  const [loading, setLoading] = useState(false);
+
+  const handleIssue = async () => {
+    setLoading(true);
+    try {
+      await issueRepair(repair.id, issuedAt.toISOString());
+      message.success('ТС выдано из ремонта');
+      onIssued();
+    } catch {
+      message.error('Ошибка при выдаче');
+      onIssued(); // resync with server state in case of a stale/conflicting status
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Space size="small">
+      <DatePicker size="small" value={issuedAt} onChange={(v) => v && setIssuedAt(v)} format="DD.MM.YYYY" allowClear={false} />
+      <Popconfirm title="Выдать ТС из ремонта?" onConfirm={handleIssue} okText="Да" cancelText="Отмена">
+        <Button size="small" type="primary" loading={loading}>Выдать</Button>
+      </Popconfirm>
+    </Space>
+  );
+}
 
 const now = dayjs();
 const monthName = now.format('MMMM');
@@ -42,16 +47,79 @@ export default function QueuePage() {
   const [search,  setSearch]  = useState('');
   const [stats,   setStats]   = useState<ExecutorStatsDto | null>(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    Promise.all([
+  const loadData = () => {
+    setLoading(true);
+    return Promise.all([
       getRepairs('2000-01-01', '2100-01-01', 1, 200)
-        .then(res => setRows(res.data.data!.items.filter(r => r.status !== 'Issued'))),
+        .then(res => setRows(res.data.data!.items.filter(r => r.status !== 'Issued')))
+        .catch(() => message.error('Ошибка загрузки заданий')),
       getMyStats()
         .then(res => setStats(res.data.data!))
         .catch(() => {}),
     ]).finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
+
+  const runAction = async (id: string, action: (id: string) => Promise<unknown>, successMsg: string) => {
+    setActionLoadingId(id);
+    try {
+      await action(id);
+      message.success(successMsg);
+      await loadData();
+    } catch {
+      message.error('Ошибка при выполнении действия');
+      await loadData(); // resync with server state in case of a stale/conflicting status
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const columns: ColumnsType<RepairDto> = [
+    { title: 'Гос. номер', dataIndex: 'licensePlate', width: 110, sorter: (a, b) => a.licensePlate.localeCompare(b.licensePlate) },
+    { title: 'ТС', dataIndex: 'vehicleMakeModel', sorter: (a, b) => a.vehicleMakeModel.localeCompare(b.vehicleMakeModel) },
+    { title: 'Заказчик', dataIndex: 'customerName', sorter: (a, b) => a.customerName.localeCompare(b.customerName) },
+    { title: 'Вид ремонта', dataIndex: 'repairTypeName', sorter: (a, b) => a.repairTypeName.localeCompare(b.repairTypeName) },
+    {
+      title: 'Статус', dataIndex: 'status', width: 110,
+      sorter: (a, b) => a.status.localeCompare(b.status),
+      render: (v: RepairStatus) => <RepairStatusTag status={v} />,
+    },
+    {
+      title: 'Дата приёмки', dataIndex: 'receivedAt', width: 120,
+      defaultSortOrder: 'descend',
+      sorter: (a, b) => new Date(a.receivedAt).getTime() - new Date(b.receivedAt).getTime(),
+      render: (v: string) => dayjs(v).format('DD.MM.YYYY'),
+    },
+    {
+      title: 'Стоимость', dataIndex: 'cost', width: 130, align: 'right',
+      sorter: (a, b) => a.cost - b.cost,
+      render: (v: number) => `${v.toLocaleString('ru', { minimumFractionDigits: 2 })} ₽`,
+    },
+    {
+      title: 'Действие', key: 'action', width: 320,
+      render: (_, repair) => (
+        <Space size="small">
+          {repair.status === 'Received' && (
+            <Popconfirm title="Взять ремонт в работу?" onConfirm={() => runAction(repair.id, startRepair, 'Ремонт взят в работу')} okText="Да" cancelText="Отмена">
+              <Button size="small" type="primary" loading={actionLoadingId === repair.id}>Начать</Button>
+            </Popconfirm>
+          )}
+          {repair.status === 'InProgress' && (
+            <Popconfirm title="Завершить ремонт?" onConfirm={() => runAction(repair.id, completeRepair, 'Ремонт завершён')} okText="Да" cancelText="Отмена">
+              <Button size="small" type="primary" loading={actionLoadingId === repair.id}>Завершить</Button>
+            </Popconfirm>
+          )}
+          {/* Выдать разрешено с любого невыданного статуса — так же, как и в десктоп-приложении */}
+          <IssueAction repair={repair} onIssued={loadData} />
+        </Space>
+      ),
+    },
+  ];
 
   const q = search.toLowerCase();
   const filtered = q

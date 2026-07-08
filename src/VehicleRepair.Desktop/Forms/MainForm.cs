@@ -25,11 +25,18 @@ public class MainForm : Form
         var menuStrip = new MenuStrip();
 
         var repairMenu = new ToolStripMenuItem("Ремонты");
-        var mnuReceive = new ToolStripMenuItem("Приёмка ТС в ремонт");
-        var mnuIssue = new ToolStripMenuItem("Выдача ТС из ремонта");
-        mnuReceive.Click += (_, _) => OpenForm(new RepairReceiveForm(_api, _auth));
+        var mnuIssue = new ToolStripMenuItem("Ремонты в работе");
         mnuIssue.Click += (_, _) => OpenForm(new RepairIssueForm(_api, _auth));
-        repairMenu.DropDownItems.AddRange(new ToolStripItem[] { mnuReceive, new ToolStripSeparator(), mnuIssue });
+        repairMenu.DropDownItems.Add(mnuIssue);
+
+        // Приёмку ТС в ремонт может выполнять только Исполнитель — сервер отклоняет остальные роли.
+        if (_auth.Role == "Executor")
+        {
+            var mnuReceive = new ToolStripMenuItem("Приёмка ТС в ремонт");
+            mnuReceive.Click += (_, _) => OpenForm(new RepairReceiveForm(_api, _auth));
+            repairMenu.DropDownItems.Insert(0, mnuReceive);
+            repairMenu.DropDownItems.Insert(1, new ToolStripSeparator());
+        }
 
         var appMenu = new ToolStripMenuItem("Система");
         var mnuLogout = new ToolStripMenuItem("Выйти из системы");
@@ -45,7 +52,7 @@ public class MainForm : Form
 
         var greet = new Label
         {
-            Text = $"Добро пожаловать, {_auth.Role ?? "пользователь"}!\n\nИспользуйте меню для работы с ремонтами:\n  • Приёмка ТС — регистрация поступления в ремонт\n  • Выдача ТС — оформление выдачи после ремонта",
+            Text = $"Добро пожаловать, {_auth.Role ?? "пользователь"}!\n\nИспользуйте меню для работы с ремонтами:\n  • Приёмка ТС — регистрация поступления в ремонт\n  • Ремонты в работе — начать/завершить/выдать ремонт",
             Dock = DockStyle.Fill,
             Font = new Font("Segoe UI", 11),
             TextAlign = ContentAlignment.MiddleCenter

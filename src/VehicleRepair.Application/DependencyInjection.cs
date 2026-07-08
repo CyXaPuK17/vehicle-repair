@@ -11,9 +11,11 @@ using VehicleRepair.Application.UseCases.Executors.Create;
 using VehicleRepair.Application.UseCases.Executors.GetAll;
 using VehicleRepair.Application.UseCases.Executors.GetStats;
 using VehicleRepair.Application.UseCases.Executors.Update;
+using VehicleRepair.Application.UseCases.Repairs.Complete;
 using VehicleRepair.Application.UseCases.Repairs.Create;
 using VehicleRepair.Application.UseCases.Repairs.GetAll;
 using VehicleRepair.Application.UseCases.Repairs.Issue;
+using VehicleRepair.Application.UseCases.Repairs.Start;
 using VehicleRepair.Application.UseCases.Repairs.Update;
 using VehicleRepair.Application.UseCases.RepairTypes.Create;
 using VehicleRepair.Application.UseCases.RepairTypes.GetAll;
@@ -66,6 +68,8 @@ public static class DependencyInjection
 
         services.AddScoped<CreateRepairUseCase>();
         services.AddScoped<UpdateRepairUseCase>();
+        services.AddScoped<StartRepairUseCase>();
+        services.AddScoped<CompleteRepairUseCase>();
         services.AddScoped<IssueRepairUseCase>();
         services.AddScoped<GetAllRepairsUseCase>();
 
