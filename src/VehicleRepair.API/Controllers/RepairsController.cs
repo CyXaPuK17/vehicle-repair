@@ -57,6 +57,7 @@ public class RepairsController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "ManagementCompany,Executor")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRepairRequest request, CancellationToken ct)
     {
         await _update.ExecuteAsync(id, request, ct);
@@ -64,6 +65,7 @@ public class RepairsController : ControllerBase
     }
 
     [HttpPatch("{id:guid}/issue")]
+    [Authorize(Roles = "ManagementCompany,Executor")]
     public async Task<IActionResult> Issue(Guid id, [FromBody] IssueRepairRequest request, CancellationToken ct)
     {
         await _issue.ExecuteAsync(id, request, ct);
