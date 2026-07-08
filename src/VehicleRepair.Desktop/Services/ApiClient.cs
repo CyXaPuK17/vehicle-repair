@@ -87,8 +87,12 @@ public class ApiClient
 
         // Use a separate handler that stores cookies for refresh token
         var res = await _http.SendAsync(req);
-        res.EnsureSuccessStatusCode();
         var body = await res.Content.ReadAsStringAsync();
+
+        if (string.IsNullOrWhiteSpace(body))
+            throw new Exception(res.StatusCode == System.Net.HttpStatusCode.Unauthorized
+                ? "Неверный логин или пароль."
+                : $"Сервер вернул пустой ответ (код {(int)res.StatusCode}).");
 
         var result = JsonConvert.DeserializeObject<ApiResponse<TokenResponse>>(body);
         if (result?.Success != true || result.Data == null)

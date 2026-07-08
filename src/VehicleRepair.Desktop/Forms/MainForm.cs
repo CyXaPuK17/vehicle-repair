@@ -25,9 +25,15 @@ public class MainForm : Form
         var menuStrip = new MenuStrip();
 
         var repairMenu = new ToolStripMenuItem("Ремонты");
-        var mnuIssue = new ToolStripMenuItem("Ремонты в работе");
-        mnuIssue.Click += (_, _) => OpenForm(new RepairIssueForm(_api, _auth));
-        repairMenu.DropDownItems.Add(mnuIssue);
+
+        // Десктоп-клиент рассчитан на Исполнителя и УК — Заказчику здесь делать нечего
+        // (сервер и так отклонит выдачу/редактирование, но пункт меню лучше не показывать вовсе).
+        if (_auth.Role != "Customer")
+        {
+            var mnuIssue = new ToolStripMenuItem("Ремонты в работе");
+            mnuIssue.Click += (_, _) => OpenForm(new RepairIssueForm(_api, _auth));
+            repairMenu.DropDownItems.Add(mnuIssue);
+        }
 
         // Приёмку ТС в ремонт может выполнять только Исполнитель — сервер отклоняет остальные роли.
         if (_auth.Role == "Executor")
