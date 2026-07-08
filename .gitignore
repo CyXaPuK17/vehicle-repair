@@ -2,6 +2,11 @@
 bin/
 obj/
 
+## Test results / coverage
+TestResults/
+*.trx
+*.coverage
+
 ## User-specific files
 *.user
 *.suo
@@ -9,6 +14,9 @@ obj/
 
 ## Rider / JetBrains
 .idea/
+
+## VS Code
+.vscode/
 
 ## Environment & secrets
 .env
@@ -18,3 +26,8 @@ obj/
 
 ## Logs
 *.log
+logs/
+
+## OS junk
+.DS_Store
+Thumbs.db

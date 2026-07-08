@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../buildMultiTargeting/VehicleRepair.API.props" />
-</Project>
