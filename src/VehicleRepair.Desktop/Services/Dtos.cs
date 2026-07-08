@@ -7,7 +7,7 @@ public class VehicleDto
     public string Make { get; set; } = "";
     public string Model { get; set; } = "";
     public int? Year { get; set; }
-    public int VehicleType { get; set; }
+    public string VehicleType { get; set; } = "";
     public string CustomerName { get; set; } = "";
     public string CustomerId { get; set; } = "";
 }
@@ -41,17 +41,25 @@ public class RepairDto
     public DateTime? IssuedAt { get; set; }
     public decimal Cost { get; set; }
     public int Mileage { get; set; }
-    public int Status { get; set; }
+    public string Status { get; set; } = "";
     public string? Comment { get; set; }
 
     public string StatusLabel => Status switch
     {
-        1 => "Принят",
-        2 => "В работе",
-        3 => "Завершён",
-        4 => "Выдан",
+        "Received" => "Принят",
+        "InProgress" => "В работе",
+        "Completed" => "Завершён",
+        "Issued" => "Выдан",
         _ => "—"
     };
+}
+
+public class PagedResultDto<T>
+{
+    public List<T> Items { get; set; } = [];
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public int Total { get; set; }
 }
 
 public class CreateRepairRequest
