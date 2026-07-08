@@ -34,14 +34,29 @@ public class ApiClient
             req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _auth.AccessToken);
     }
 
+    private static ApiResponse<T> ParseResponse<T>(System.Net.HttpStatusCode statusCode, string body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            throw statusCode switch
+            {
+                System.Net.HttpStatusCode.Unauthorized => new Exception("Сессия истекла. Войдите заново."),
+                System.Net.HttpStatusCode.Forbidden => new Exception("Недостаточно прав для этого действия."),
+                _ => new Exception($"Сервер вернул пустой ответ (код {(int)statusCode}).")
+            };
+        }
+
+        return JsonConvert.DeserializeObject<ApiResponse<T>>(body)
+               ?? throw new Exception("Пустой ответ от сервера");
+    }
+
     public async Task<ApiResponse<T>> GetAsync<T>(string path)
     {
         using var req = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}{path}");
         AddAuth(req);
         var res = await _http.SendAsync(req);
         var body = await res.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<ApiResponse<T>>(body)
-               ?? throw new Exception("Пустой ответ от сервера");
+        return ParseResponse<T>(res.StatusCode, body);
     }
 
     public async Task<ApiResponse<T>> PostAsync<T>(string path, object payload)
@@ -51,8 +66,7 @@ public class ApiClient
         req.Content = new StringContent(JsonConvert.SerializeObject(payload), System.Text.Encoding.UTF8, "application/json");
         var res = await _http.SendAsync(req);
         var body = await res.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<ApiResponse<T>>(body)
-               ?? throw new Exception("Пустой ответ от сервера");
+        return ParseResponse<T>(res.StatusCode, body);
     }
 
     public async Task<ApiResponse<T>> PatchAsync<T>(string path, object payload)
@@ -62,8 +76,7 @@ public class ApiClient
         req.Content = new StringContent(JsonConvert.SerializeObject(payload), System.Text.Encoding.UTF8, "application/json");
         var res = await _http.SendAsync(req);
         var body = await res.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<ApiResponse<T>>(body)
-               ?? throw new Exception("Пустой ответ от сервера");
+        return ParseResponse<T>(res.StatusCode, body);
     }
 
     public async Task LoginAsync(string login, string password)
