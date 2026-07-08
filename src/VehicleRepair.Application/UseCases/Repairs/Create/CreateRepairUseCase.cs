@@ -1,3 +1,4 @@
+using VehicleRepair.Application.Common;
 using VehicleRepair.Application.Common.Interfaces;
 using VehicleRepair.Application.DTOs.Repairs;
 using VehicleRepair.Domain.Entities;
@@ -40,7 +41,7 @@ public class CreateRepairUseCase
             VehicleId = request.VehicleId,
             ExecutorId = executorId,
             RepairTypeId = request.RepairTypeId,
-            ReceivedAt = request.ReceivedAt,
+            ReceivedAt = DateTimeUtc.EnsureUtc(request.ReceivedAt),
             Cost = request.Cost,
             Mileage = request.Mileage,
             Comment = request.Comment,

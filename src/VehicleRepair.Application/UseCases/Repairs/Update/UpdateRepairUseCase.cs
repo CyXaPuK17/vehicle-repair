@@ -1,3 +1,4 @@
+using VehicleRepair.Application.Common;
 using VehicleRepair.Application.Common.Interfaces;
 using VehicleRepair.Application.DTOs.Repairs;
 using VehicleRepair.Domain.Entities;
@@ -36,7 +37,7 @@ public class UpdateRepairUseCase
             throw new NotFoundException(nameof(RepairType), request.RepairTypeId);
 
         repair.RepairTypeId = request.RepairTypeId;
-        repair.ReceivedAt = request.ReceivedAt;
+        repair.ReceivedAt = DateTimeUtc.EnsureUtc(request.ReceivedAt);
         repair.Cost = request.Cost;
         repair.Mileage = request.Mileage;
         repair.Comment = request.Comment;

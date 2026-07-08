@@ -1,3 +1,4 @@
+using VehicleRepair.Application.Common;
 using VehicleRepair.Application.Common.Interfaces;
 using VehicleRepair.Application.Common.Models;
 using VehicleRepair.Application.DTOs.Repairs;
@@ -31,8 +32,8 @@ public class GetAllRepairsUseCase
         }
         else
         {
-            var dateFrom = from ?? new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            var dateTo = to ?? new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var dateFrom = from.HasValue ? DateTimeUtc.EnsureUtc(from.Value) : new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var dateTo = to.HasValue ? DateTimeUtc.EnsureUtc(to.Value) : new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
             repairs = _currentUser.Role == UserRole.Executor && _currentUser.LinkedEntityId.HasValue
                 ? await _uow.Repairs.GetByExecutorIdAsync(_currentUser.LinkedEntityId.Value, dateFrom, dateTo, ct)

@@ -1,3 +1,4 @@
+using VehicleRepair.Application.Common;
 using VehicleRepair.Application.Common.Interfaces;
 using VehicleRepair.Application.DTOs.Repairs;
 using VehicleRepair.Domain.Entities;
@@ -29,10 +30,11 @@ public class IssueRepairUseCase
         if (_currentUser.Role == UserRole.Executor && repair.ExecutorId != _currentUser.LinkedEntityId)
             throw new ForbiddenException("Нет доступа к этому ремонту.");
 
-        if (request.IssuedAt < repair.ReceivedAt)
+        var issuedAtUtc = DateTimeUtc.EnsureUtc(request.IssuedAt);
+        if (issuedAtUtc < repair.ReceivedAt)
             throw new DomainException("Дата выдачи не может быть раньше даты приёмки.");
 
-        repair.IssuedAt = request.IssuedAt;
+        repair.IssuedAt = issuedAtUtc;
         repair.Status = RepairStatus.Issued;
         repair.UpdatedAt = DateTime.UtcNow;
 

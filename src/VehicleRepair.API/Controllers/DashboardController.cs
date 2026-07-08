@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VehicleRepair.Application.Common;
 using VehicleRepair.Application.Common.Models;
 using VehicleRepair.Application.DTOs.Dashboard;
 using VehicleRepair.Application.UseCases.Dashboard;
@@ -29,8 +30,8 @@ public class DashboardController : ControllerBase
         CancellationToken ct = default)
     {
         var now      = DateTime.UtcNow;
-        var fromDate = from?.ToUniversalTime() ?? new DateTime(now.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        var toDate   = to?.ToUniversalTime()   ?? now;
+        var fromDate = from.HasValue ? DateTimeUtc.EnsureUtc(from.Value) : new DateTime(now.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var toDate   = to.HasValue ? DateTimeUtc.EnsureUtc(to.Value) : now;
         return Ok(ApiResponse<DashboardDto>.Ok(await _useCase.ExecuteAsync(fromDate, toDate, topCount, ct)));
     }
 
