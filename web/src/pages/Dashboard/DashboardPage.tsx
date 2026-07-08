@@ -3,6 +3,9 @@ import { Card, Col, Row, Statistic, Table, Typography, Spin, Alert, Space, Selec
 import type { ColumnsType } from 'antd/es/table';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
+
+dayjs.extend(isoWeek);
 import { ClockCircleOutlined, SyncOutlined, CheckCircleOutlined, CalendarOutlined, DollarOutlined } from '@ant-design/icons';
 import { getDashboard, type ExecutorStatDto, type DashboardDto } from '../../api/dashboard';
 

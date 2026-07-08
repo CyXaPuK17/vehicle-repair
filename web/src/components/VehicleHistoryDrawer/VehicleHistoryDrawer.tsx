@@ -62,7 +62,7 @@ export default function VehicleHistoryDrawer({ vehicleId, title, onClose }: Prop
       onClose={onClose}
       title={<>История ремонтов<Typography.Text type="secondary" style={{ marginLeft: 8, fontWeight: 400 }}>{title}</Typography.Text></>}
       width={800}
-      destroyOnHide
+      destroyOnHidden
     >
       {loading && <Spin style={{ display: 'block', margin: '40px auto' }} />}
       {error   && <Alert type="error" message={error} showIcon />}
