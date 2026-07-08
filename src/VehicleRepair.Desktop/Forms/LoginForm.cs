@@ -25,9 +25,6 @@ public class LoginForm : Form
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
 
-        var pnl = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24) };
-        Controls.Add(pnl);
-
         var title = new Label
         {
             Text = "Учёт ремонтов ТС",
