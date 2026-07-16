@@ -20,7 +20,6 @@ public class UpdateExecutorUseCase
         executor.Address = request.Address;
         executor.Phone = request.Phone;
         executor.Email = request.Email;
-        executor.IsActive = request.IsActive;
 
         _uow.Executors.Update(executor);
         await _uow.SaveChangesAsync(ct);

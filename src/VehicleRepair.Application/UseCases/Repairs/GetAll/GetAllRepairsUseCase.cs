@@ -63,6 +63,9 @@ public class GetAllRepairsUseCase
         r.Mileage,
         r.Status,
         r.Comment,
-        r.CreatedAt
+        r.CreatedAt,
+        r.Vehicle?.IsActive ?? true,
+        r.Vehicle?.Customer?.IsActive ?? true,
+        r.Executor?.IsActive ?? true
     );
 }

@@ -14,7 +14,6 @@ import UsersPage from '../pages/Users/UsersPage';
 import RoleRedirect from '../components/common/RoleRedirect';
 import ProfilePage from '../pages/Profile/ProfilePage';
 import DashboardPage from '../pages/Dashboard/DashboardPage';
-import CustomerDashboardPage from '../pages/Dashboard/CustomerDashboardPage';
 import RepairsPage from '../pages/Repairs/RepairsPage';
 import ActiveRepairsPage from '../pages/ActiveRepairs/ActiveRepairsPage';
 import QueuePage from '../pages/Queue/QueuePage';
@@ -39,14 +38,6 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth roles={['ManagementCompany']}>
             <RepairsPage />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: 'customer-dashboard',
-        element: (
-          <RequireAuth roles={['Customer']}>
-            <CustomerDashboardPage />
           </RequireAuth>
         ),
       },

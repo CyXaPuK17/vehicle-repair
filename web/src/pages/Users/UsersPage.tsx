@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Button, Modal, Form, Input, Select, Tag, Typography, message, Divider } from 'antd';
-import { PlusOutlined, KeyOutlined, EditOutlined } from '@ant-design/icons';
+import { Table, Card, Button, Modal, Form, Input, Select, Tag, Typography, message } from 'antd';
+import { PlusOutlined, EditOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { getUsers, createUser, updateUser, changePassword, setUserActive } from '../../api/users';
+import { getUsers, createUser, updateUser, setUserActive } from '../../api/users';
 import { getCustomers } from '../../api/customers';
 import { getExecutors } from '../../api/executors';
 import type { UserDto, CustomerDto, ExecutorDto, UserRole } from '../../types';
@@ -29,10 +29,8 @@ export default function UsersPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserDto | null>(null);
-  const [pwdOpen, setPwdOpen] = useState(false);
   const [createForm] = Form.useForm();
   const [editForm] = Form.useForm();
-  const [pwdForm] = Form.useForm();
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [editRole, setEditRole] = useState<UserRole | null>(null);
 
@@ -97,18 +95,6 @@ export default function UsersPage() {
     }
   };
 
-  const handleChangePwd = async () => {
-    const { currentPassword, newPassword } = await pwdForm.validateFields();
-    try {
-      await changePassword(currentPassword, newPassword);
-      message.success('Пароль изменён');
-      setPwdOpen(false);
-      pwdForm.resetFields();
-    } catch {
-      message.error('Ошибка при смене пароля');
-    }
-  };
-
   const columns: ColumnsType<UserDto> = [
     { title: 'Логин', dataIndex: 'login', sorter: (a, b) => a.login.localeCompare(b.login) },
     {
@@ -153,14 +139,9 @@ export default function UsersPage() {
     <Card
       title={<Typography.Title level={4} style={{ margin: 0 }}>Пользователи</Typography.Title>}
       extra={
-        <Button.Group>
-          <Button icon={<KeyOutlined />} onClick={() => { pwdForm.resetFields(); setPwdOpen(true); }}>
-            Сменить пароль
-          </Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => { createForm.resetFields(); setSelectedRole(null); setCreateOpen(true); }}>
-            Добавить
-          </Button>
-        </Button.Group>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => { createForm.resetFields(); setSelectedRole(null); setCreateOpen(true); }}>
+          Добавить
+        </Button>
       }
     >
       <Table
@@ -241,34 +222,6 @@ export default function UsersPage() {
               />
             </Form.Item>
           )}
-        </Form>
-      </Modal>
-
-      <Modal title="Смена пароля" open={pwdOpen} onOk={handleChangePwd} onCancel={() => setPwdOpen(false)} okText="Изменить">
-        <Form form={pwdForm} layout="vertical">
-          <Form.Item name="currentPassword" label="Текущий пароль" rules={[{ required: true }]}>
-            <Input.Password />
-          </Form.Item>
-          <Divider />
-          <Form.Item name="newPassword" label="Новый пароль" rules={[{ required: true, min: 6 }]}>
-            <Input.Password />
-          </Form.Item>
-          <Form.Item
-            name="confirmPassword"
-            label="Повторите пароль"
-            dependencies={['newPassword']}
-            rules={[
-              { required: true },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue('newPassword') === value) return Promise.resolve();
-                  return Promise.reject(new Error('Пароли не совпадают'));
-                },
-              }),
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
         </Form>
       </Modal>
     </Card>

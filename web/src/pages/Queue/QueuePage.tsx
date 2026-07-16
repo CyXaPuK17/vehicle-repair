@@ -8,6 +8,7 @@ import { getMyStats, type ExecutorStatsDto } from '../../api/executors';
 import type { RepairDto, RepairStatus } from '../../types';
 import { RepairStatusTag } from '../../utils/repairStatus';
 import { PAGINATION } from '../../utils/pagination';
+import InactiveHint from '../../components/common/InactiveHint';
 
 function IssueAction({ repair, onIssued }: { repair: RepairDto; onIssued: () => void }) {
   const [issuedAt, setIssuedAt] = useState<Dayjs>(() => dayjs());
@@ -37,10 +38,6 @@ function IssueAction({ repair, onIssued }: { repair: RepairDto; onIssued: () => 
   );
 }
 
-const now = dayjs();
-const monthName = now.format('MMMM');
-const yearNum   = now.year();
-
 export default function QueuePage() {
   const { token } = theme.useToken();
   const [rows,    setRows]    = useState<RepairDto[]>([]);
@@ -48,6 +45,10 @@ export default function QueuePage() {
   const [stats,   setStats]   = useState<ExecutorStatsDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+  const now = dayjs();
+  const monthName = now.format('MMMM');
+  const yearNum   = now.year();
 
   const loadData = () => {
     setLoading(true);
@@ -80,9 +81,15 @@ export default function QueuePage() {
   };
 
   const columns: ColumnsType<RepairDto> = [
-    { title: 'Гос. номер', dataIndex: 'licensePlate', width: 110, sorter: (a, b) => a.licensePlate.localeCompare(b.licensePlate) },
+    {
+      title: 'Гос. номер', dataIndex: 'licensePlate', width: 110, sorter: (a, b) => a.licensePlate.localeCompare(b.licensePlate),
+      render: (v: string, r) => <>{v}<InactiveHint active={r.isVehicleActive} /></>,
+    },
     { title: 'ТС', dataIndex: 'vehicleMakeModel', sorter: (a, b) => a.vehicleMakeModel.localeCompare(b.vehicleMakeModel) },
-    { title: 'Заказчик', dataIndex: 'customerName', sorter: (a, b) => a.customerName.localeCompare(b.customerName) },
+    {
+      title: 'Заказчик', dataIndex: 'customerName', sorter: (a, b) => a.customerName.localeCompare(b.customerName),
+      render: (v: string, r) => <>{v}<InactiveHint active={r.isCustomerActive} /></>,
+    },
     { title: 'Вид ремонта', dataIndex: 'repairTypeName', sorter: (a, b) => a.repairTypeName.localeCompare(b.repairTypeName) },
     {
       title: 'Статус', dataIndex: 'status', width: 110,

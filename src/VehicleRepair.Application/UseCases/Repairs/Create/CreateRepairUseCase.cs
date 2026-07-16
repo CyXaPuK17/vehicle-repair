@@ -24,6 +24,9 @@ public class CreateRepairUseCase
         var vehicle = await _uow.Vehicles.GetByIdAsync(request.VehicleId, ct)
             ?? throw new NotFoundException(nameof(Vehicle), request.VehicleId);
 
+        if (!vehicle.IsActive)
+            throw new DomainException("Нельзя принять в ремонт деактивированное ТС.");
+
         if (await _uow.RepairTypes.GetByIdAsync(request.RepairTypeId, ct) is null)
             throw new NotFoundException(nameof(RepairType), request.RepairTypeId);
 

@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Typography, Tag, Button, Input, theme } from 'antd';
+import { Table, Card, Typography, Tag, Button, Input, theme, Row, Col, Statistic } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import { HistoryOutlined, SearchOutlined } from '@ant-design/icons';
+import { HistoryOutlined, SearchOutlined, CarOutlined, SyncOutlined, DollarOutlined } from '@ant-design/icons';
 import { getRepairs } from '../../api/repairs';
+import { getCustomerDashboard, type CustomerDashboardDto } from '../../api/dashboard';
 import type { RepairDto, RepairStatus } from '../../types';
 import { RepairStatusTag } from '../../utils/repairStatus';
 import { PAGINATION } from '../../utils/pagination';
 import VehicleHistoryDrawer from '../../components/VehicleHistoryDrawer/VehicleHistoryDrawer';
+import InactiveHint from '../../components/common/InactiveHint';
+
+const year = dayjs().year();
 
 export default function ActiveRepairsPage() {
   const { token } = theme.useToken();
   const [rows, setRows]           = useState<RepairDto[]>([]);
+  const [stats, setStats]         = useState<CustomerDashboardDto | null>(null);
   const [search, setSearch]       = useState('');
   const [loading, setLoading]     = useState(true);
   const [historyItem, setHistoryItem] = useState<RepairDto | null>(null);
@@ -20,13 +25,22 @@ export default function ActiveRepairsPage() {
     getRepairs(undefined, undefined, 1, 200)
       .then(res => setRows(res.data.data!.items))
       .finally(() => setLoading(false));
+    getCustomerDashboard()
+      .then(res => setStats(res.data.data!))
+      .catch(() => {});
   }, []);
 
   const columns: ColumnsType<RepairDto> = [
-    { title: 'Гос. номер', dataIndex: 'licensePlate', width: 110, sorter: (a, b) => a.licensePlate.localeCompare(b.licensePlate) },
+    {
+      title: 'Гос. номер', dataIndex: 'licensePlate', width: 110, sorter: (a, b) => a.licensePlate.localeCompare(b.licensePlate),
+      render: (v: string, r) => <>{v}<InactiveHint active={r.isVehicleActive} /></>,
+    },
     { title: 'ТС', dataIndex: 'vehicleMakeModel', sorter: (a, b) => a.vehicleMakeModel.localeCompare(b.vehicleMakeModel) },
     { title: 'Вид ремонта', dataIndex: 'repairTypeName', sorter: (a, b) => a.repairTypeName.localeCompare(b.repairTypeName) },
-    { title: 'Исполнитель', dataIndex: 'executorName', sorter: (a, b) => a.executorName.localeCompare(b.executorName) },
+    {
+      title: 'Исполнитель', dataIndex: 'executorName', sorter: (a, b) => a.executorName.localeCompare(b.executorName),
+      render: (v: string, r) => <>{v}<InactiveHint active={r.isExecutorActive} /></>,
+    },
     {
       title: 'Статус', dataIndex: 'status', width: 110,
       sorter: (a, b) => a.status.localeCompare(b.status),
@@ -60,7 +74,44 @@ export default function ActiveRepairsPage() {
     : rows;
 
   return (
-    <Card title={
+    <>
+      {stats && (
+        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+          <Col xs={24} sm={8}>
+            <Card>
+              <Statistic
+                title="Мои ТС"
+                value={stats.vehicleCount}
+                prefix={<CarOutlined />}
+                valueStyle={{ color: '#1677ff' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Card>
+              <Statistic
+                title="Активных ремонтов"
+                value={stats.activeRepairs}
+                prefix={<SyncOutlined spin={stats.activeRepairs > 0} />}
+                valueStyle={{ color: '#fa8c16' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Card>
+              <Statistic
+                title={`Потрачено за ${year} год`}
+                value={stats.spentForYear}
+                precision={2}
+                suffix="₽"
+                prefix={<DollarOutlined />}
+                valueStyle={{ color: '#52c41a' }}
+              />
+            </Card>
+          </Col>
+        </Row>
+      )}
+      <Card title={
       <Typography.Title level={4} style={{ margin: 0 }}>
         Текущие ремонты
         {!loading && rows.length === 0 && (
@@ -98,6 +149,7 @@ export default function ActiveRepairsPage() {
         title={historyItem ? `${historyItem.licensePlate} · ${historyItem.vehicleMakeModel}` : ''}
         onClose={() => setHistoryItem(null)}
       />
-    </Card>
+      </Card>
+    </>
   );
 }

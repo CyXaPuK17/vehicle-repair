@@ -4,6 +4,5 @@ public record UpdateCustomerRequest(
     string Name,
     string? ContactPerson,
     string? Phone,
-    string? Email,
-    bool IsActive
+    string? Email
 );

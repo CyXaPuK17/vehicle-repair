@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Button, Modal, Form, Input, Select, InputNumber, Switch, Typography, message, Space } from 'antd';
+import { Table, Card, Button, Modal, Form, Input, Select, InputNumber, Typography, message, Space } from 'antd';
 import { PlusOutlined, EditOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { getVehicles, createVehicle, updateVehicle } from '../../api/vehicles';
@@ -25,8 +25,6 @@ export default function VehiclesPage() {
   const [editing, setEditing] = useState<VehicleDto | null>(null);
   const [form] = Form.useForm();
   const [search, setSearch] = useState('');
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [bulkLoading, setBulkLoading] = useState(false);
   const [historyVehicle, setHistoryVehicle] = useState<VehicleDto | null>(null);
 
   const load = async () => {
@@ -56,7 +54,6 @@ export default function VehiclesPage() {
       year: v.year,
       vin: v.vin,
       vehicleType: v.vehicleType,
-      isActive: v.isActive,
     });
     setModalOpen(true);
   };
@@ -75,24 +72,6 @@ export default function VehiclesPage() {
       load();
     } catch {
       message.error('Ошибка при сохранении');
-    }
-  };
-
-  const handleBulkStatus = async (isActive: boolean) => {
-    setBulkLoading(true);
-    try {
-      const selected = vehicles.filter(v => selectedRowKeys.includes(v.id));
-      await Promise.all(selected.map(v => updateVehicle(v.id, {
-        licensePlate: v.licensePlate, make: v.make, model: v.model,
-        year: v.year, vin: v.vin, vehicleType: v.vehicleType, isActive,
-      })));
-      setSelectedRowKeys([]);
-      message.success(`${selected.length} записей обновлено`);
-      load();
-    } catch {
-      message.error('Ошибка при обновлении');
-    } finally {
-      setBulkLoading(false);
     }
   };
 
@@ -129,23 +108,11 @@ export default function VehiclesPage() {
     ? vehicles.filter(v => [v.licensePlate, v.make, v.model, v.vin, v.customerName].some(f => f?.toLowerCase().includes(q)))
     : vehicles;
 
-  const selectedItems = vehicles.filter(v => selectedRowKeys.includes(v.id));
-  const bulkBar = selectedRowKeys.length > 0 && (
-    <Space>
-      <Typography.Text type="secondary">{selectedRowKeys.length} выбрано</Typography.Text>
-      {selectedItems.some(v => !v.isActive) && <Button size="small" loading={bulkLoading} onClick={() => handleBulkStatus(true)}>Активировать</Button>}
-      {selectedItems.some(v => v.isActive) && <Button size="small" danger loading={bulkLoading} onClick={() => handleBulkStatus(false)}>Деактивировать</Button>}
-    </Space>
-  );
-
   return (
     <Card
       title={<Typography.Title level={4} style={{ margin: 0 }}>Транспортные средства</Typography.Title>}
       extra={
-        <Space>
-          {bulkBar}
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Добавить</Button>
-        </Space>
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Добавить</Button>
       }
     >
       <Input
@@ -164,7 +131,6 @@ export default function VehiclesPage() {
         size="small"
         pagination={PAGINATION}
         showSorterTooltip={false}
-        rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
       />
       <Modal
         title={editing ? 'Редактировать ТС' : 'Новое ТС'}
@@ -189,11 +155,6 @@ export default function VehiclesPage() {
                 options={customers.map(c => ({ value: c.id, label: `${c.name} (${c.inn})` }))}
                 filterOption={(input, opt) => (opt?.label as string ?? '').toLowerCase().includes(input.toLowerCase())}
               />
-            </Form.Item>
-          )}
-          {editing && (
-            <Form.Item name="isActive" label="Активен" valuePropName="checked">
-              <Switch />
             </Form.Item>
           )}
         </Form>

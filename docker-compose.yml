@@ -27,8 +27,6 @@ services:
       Cors__Origins: http://localhost
       Seed__AdminLogin: admin
       Seed__AdminPassword: Admin123!
-      Seed__ManagerLogin: uk_manager
-      Seed__ManagerPassword: Manager123!
     depends_on:
       db:
         condition: service_healthy

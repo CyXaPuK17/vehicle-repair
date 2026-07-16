@@ -26,7 +26,6 @@ public class UpdateVehicleUseCase
         vehicle.Year = request.Year;
         vehicle.VIN = request.VIN?.ToUpper();
         vehicle.VehicleType = request.VehicleType;
-        vehicle.IsActive = request.IsActive;
 
         await _uow.SaveChangesAsync(ct);
     }

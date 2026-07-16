@@ -81,6 +81,9 @@ export interface RepairDto {
   status: RepairStatus;
   comment?: string;
   createdAt: string;
+  isVehicleActive: boolean;
+  isCustomerActive: boolean;
+  isExecutorActive: boolean;
 }
 
 export interface UserDto {

@@ -7,7 +7,7 @@ function PaginationSelect(props: SelectProps) {
 }
 
 export const PAGINATION: TablePaginationConfig = {
-  defaultPageSize: 25,
+  defaultPageSize: 10,
   showSizeChanger: true,
   pageSizeOptions: ['10', '25', '50'],
   locale: { items_per_page: '' },
