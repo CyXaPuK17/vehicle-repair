@@ -8,6 +8,5 @@ public record UpdateVehicleRequest(
     string Model,
     int? Year,
     string? VIN,
-    VehicleType VehicleType,
-    bool IsActive
+    VehicleType VehicleType
 );

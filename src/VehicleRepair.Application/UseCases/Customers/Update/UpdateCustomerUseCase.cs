@@ -20,7 +20,6 @@ public class UpdateCustomerUseCase
         customer.ContactPerson = request.ContactPerson;
         customer.Phone = request.Phone;
         customer.Email = request.Email;
-        customer.IsActive = request.IsActive;
 
         _uow.Customers.Update(customer);
         await _uow.SaveChangesAsync(ct);
