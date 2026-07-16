@@ -19,5 +19,8 @@ public record RepairDto(
     int Mileage,
     RepairStatus Status,
     string? Comment,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    bool IsVehicleActive,
+    bool IsCustomerActive,
+    bool IsExecutorActive
 );
