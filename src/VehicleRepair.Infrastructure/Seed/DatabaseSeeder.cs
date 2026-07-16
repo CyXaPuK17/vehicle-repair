@@ -23,9 +23,8 @@ public class DatabaseSeeder
         _hasher = hasher;
     }
 
-    // ── Admin / Manager ────────────────────────────────────────────────────────
-    private static readonly Guid AdminId   = new("00000000-0000-0000-0000-000000000001");
-    private static readonly Guid ManagerId = new("00000000-0000-0000-0000-000000000002");
+    // ── Admin ──────────────────────────────────────────────────────────────────
+    private static readonly Guid AdminId = new("00000000-0000-0000-0000-000000000001");
 
     // ── Repair Types ───────────────────────────────────────────────────────────
     private static readonly Guid RT1  = new("a0000001-0000-0000-0000-000000000001"); // ТО-1
@@ -127,17 +126,14 @@ public class DatabaseSeeder
     {
         if (await _db.Users.AnyAsync(ct)) return;
 
-        var adminPwd   = _config["Seed:AdminPassword"]   ?? throw new InvalidOperationException("Seed:AdminPassword not configured");
-        var managerPwd = _config["Seed:ManagerPassword"] ?? throw new InvalidOperationException("Seed:ManagerPassword not configured");
-        var adminLogin   = _config["Seed:AdminLogin"]   ?? "admin";
-        var managerLogin = _config["Seed:ManagerLogin"] ?? "uk_manager";
+        var adminPwd   = _config["Seed:AdminPassword"] ?? throw new InvalidOperationException("Seed:AdminPassword not configured");
+        var adminLogin = _config["Seed:AdminLogin"]    ?? "admin";
 
-        _db.Users.AddRange(
-            new User { Id = AdminId,   Login = adminLogin,   PasswordHash = _hasher.Hash(adminPwd),   Role = UserRole.ManagementCompany, IsActive = true, CreatedAt = DateTime.UtcNow },
-            new User { Id = ManagerId, Login = managerLogin, PasswordHash = _hasher.Hash(managerPwd), Role = UserRole.ManagementCompany, IsActive = true, CreatedAt = DateTime.UtcNow }
+        _db.Users.Add(
+            new User { Id = AdminId, Login = adminLogin, PasswordHash = _hasher.Hash(adminPwd), Role = UserRole.ManagementCompany, IsActive = true, CreatedAt = DateTime.UtcNow }
         );
 
-        _logger.LogDebug("Seeded admin users.");
+        _logger.LogDebug("Seeded admin user.");
     }
 
     private async Task SeedCustomersAsync(CancellationToken ct)
