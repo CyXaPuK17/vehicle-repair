@@ -59,7 +59,6 @@ export default function AppLayout() {
 
   const menuItems = [
     ...(isUK ? [{ key: '/dashboard', icon: <DashboardOutlined />, label: 'Главная' }] : []),
-    ...(isCustomer ? [{ key: '/customer-dashboard', icon: <DashboardOutlined />, label: 'Главная' }] : []),
     ...(isUK ? [{ key: '/repairs', icon: <FileSearchOutlined />, label: 'Ремонты' }] : []),
     ...(isExecutor ? [{ key: '/queue', icon: <UnorderedListOutlined />, label: 'Мои задания' }] : []),
     ...(isCustomer ? [{ key: '/active-repairs', icon: <CarOutlined />, label: 'Текущие ремонты' }] : []),
