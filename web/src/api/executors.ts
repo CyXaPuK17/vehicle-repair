@@ -12,7 +12,7 @@ export interface ExecutorStatsDto {
 export const getExecutors = () => api.get<ApiResponse<ExecutorDto[]>>('/executors');
 export const createExecutor = (data: Omit<ExecutorDto, 'id' | 'isActive' | 'createdAt'>) =>
   api.post<ApiResponse<string>>('/executors', data);
-export const updateExecutor = (id: string, data: Partial<ExecutorDto>) =>
+export const updateExecutor = (id: string, data: Omit<ExecutorDto, 'id' | 'inn' | 'isActive' | 'createdAt'>) =>
   api.put<ApiResponse<string>>(`/executors/${id}`, data);
 export const getMyStats = () =>
   api.get<ApiResponse<ExecutorStatsDto>>('/executors/me/stats');

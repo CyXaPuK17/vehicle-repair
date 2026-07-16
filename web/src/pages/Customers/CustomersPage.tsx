@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Button, Modal, Form, Input, Switch, Typography, message, Space } from 'antd';
+import { Table, Card, Button, Modal, Form, Input, Typography, message } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { getCustomers, createCustomer, updateCustomer } from '../../api/customers';
@@ -14,8 +14,6 @@ export default function CustomersPage() {
   const [editing, setEditing] = useState<CustomerDto | null>(null);
   const [form] = Form.useForm();
   const [search, setSearch] = useState('');
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [bulkLoading, setBulkLoading] = useState(false);
 
   const load = async () => {
     try {
@@ -48,23 +46,6 @@ export default function CustomersPage() {
     }
   };
 
-  const handleBulkStatus = async (isActive: boolean) => {
-    setBulkLoading(true);
-    try {
-      const selected = customers.filter(c => selectedRowKeys.includes(c.id));
-      await Promise.all(selected.map(c => updateCustomer(c.id, {
-        name: c.name, contactPerson: c.contactPerson, phone: c.phone, email: c.email, isActive,
-      })));
-      setSelectedRowKeys([]);
-      message.success(`${selected.length} записей обновлено`);
-      load();
-    } catch {
-      message.error('Ошибка при обновлении');
-    } finally {
-      setBulkLoading(false);
-    }
-  };
-
   const columns: ColumnsType<CustomerDto> = [
     { title: 'ИНН', dataIndex: 'inn', width: 130, sorter: (a, b) => a.inn.localeCompare(b.inn) },
     { title: 'Наименование', dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
@@ -75,6 +56,7 @@ export default function CustomersPage() {
       title: 'Статус', dataIndex: 'isActive',
       sorter: (a, b) => Number(a.isActive) - Number(b.isActive),
       render: (v: boolean) => <StatusTag isActive={v} />,
+      // Статус — производная от активности привязанного пользователя (вкладка "Пользователи"), не редактируется здесь.
     },
     {
       title: '', key: 'actions',
@@ -87,23 +69,11 @@ export default function CustomersPage() {
     ? customers.filter(c => [c.inn, c.name, c.contactPerson, c.phone, c.email].some(v => v?.toLowerCase().includes(q)))
     : customers;
 
-  const selectedItems = customers.filter(c => selectedRowKeys.includes(c.id));
-  const bulkBar = selectedRowKeys.length > 0 && (
-    <Space>
-      <Typography.Text type="secondary">{selectedRowKeys.length} выбрано</Typography.Text>
-      {selectedItems.some(c => !c.isActive) && <Button size="small" loading={bulkLoading} onClick={() => handleBulkStatus(true)}>Активировать</Button>}
-      {selectedItems.some(c => c.isActive) && <Button size="small" danger loading={bulkLoading} onClick={() => handleBulkStatus(false)}>Деактивировать</Button>}
-    </Space>
-  );
-
   return (
     <Card
       title={<Typography.Title level={4} style={{ margin: 0 }}>Заказчики</Typography.Title>}
       extra={
-        <Space>
-          {bulkBar}
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Добавить</Button>
-        </Space>
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Добавить</Button>
       }
     >
       <Input
@@ -122,7 +92,6 @@ export default function CustomersPage() {
         size="small"
         pagination={PAGINATION}
         showSorterTooltip={false}
-        rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
       />
       <Modal
         title={editing ? 'Редактировать заказчика' : 'Новый заказчик'}
@@ -143,11 +112,6 @@ export default function CustomersPage() {
           <Form.Item name="contactPerson" label="Контактное лицо"><Input /></Form.Item>
           <Form.Item name="phone" label="Телефон"><Input /></Form.Item>
           <Form.Item name="email" label="Email" rules={[{ type: 'email' }]}><Input /></Form.Item>
-          {editing && (
-            <Form.Item name="isActive" label="Активен" valuePropName="checked">
-              <Switch />
-            </Form.Item>
-          )}
         </Form>
       </Modal>
     </Card>

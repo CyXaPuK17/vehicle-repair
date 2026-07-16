@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Button, Modal, Form, Input, Switch, Typography, message, Space } from 'antd';
+import { Table, Card, Button, Modal, Form, Input, Typography, message } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { getExecutors, createExecutor, updateExecutor } from '../../api/executors';
@@ -14,8 +14,6 @@ export default function ExecutorsPage() {
   const [editing, setEditing] = useState<ExecutorDto | null>(null);
   const [form] = Form.useForm();
   const [search, setSearch] = useState('');
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [bulkLoading, setBulkLoading] = useState(false);
 
   const load = async () => {
     try {
@@ -52,23 +50,6 @@ export default function ExecutorsPage() {
     }
   };
 
-  const handleBulkStatus = async (isActive: boolean) => {
-    setBulkLoading(true);
-    try {
-      const selected = executors.filter(e => selectedRowKeys.includes(e.id));
-      await Promise.all(selected.map(e => updateExecutor(e.id, {
-        name: e.name, address: e.address, phone: e.phone, email: e.email, isActive,
-      })));
-      setSelectedRowKeys([]);
-      message.success(`${selected.length} записей обновлено`);
-      load();
-    } catch {
-      message.error('Ошибка при обновлении');
-    } finally {
-      setBulkLoading(false);
-    }
-  };
-
   const columns: ColumnsType<ExecutorDto> = [
     { title: 'ИНН', dataIndex: 'inn', width: 130, sorter: (a, b) => a.inn.localeCompare(b.inn) },
     { title: 'Наименование', dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
@@ -91,23 +72,11 @@ export default function ExecutorsPage() {
     ? executors.filter(e => [e.inn, e.name, e.address, e.phone, e.email].some(v => v?.toLowerCase().includes(q)))
     : executors;
 
-  const selectedItems = executors.filter(e => selectedRowKeys.includes(e.id));
-  const bulkBar = selectedRowKeys.length > 0 && (
-    <Space>
-      <Typography.Text type="secondary">{selectedRowKeys.length} выбрано</Typography.Text>
-      {selectedItems.some(e => !e.isActive) && <Button size="small" loading={bulkLoading} onClick={() => handleBulkStatus(true)}>Активировать</Button>}
-      {selectedItems.some(e => e.isActive) && <Button size="small" danger loading={bulkLoading} onClick={() => handleBulkStatus(false)}>Деактивировать</Button>}
-    </Space>
-  );
-
   return (
     <Card
       title={<Typography.Title level={4} style={{ margin: 0 }}>Исполнители</Typography.Title>}
       extra={
-        <Space>
-          {bulkBar}
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Добавить</Button>
-        </Space>
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Добавить</Button>
       }
     >
       <Input
@@ -126,7 +95,6 @@ export default function ExecutorsPage() {
         size="small"
         pagination={PAGINATION}
         showSorterTooltip={false}
-        rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
       />
       <Modal
         title={editing ? 'Редактировать исполнителя' : 'Новый исполнитель'}
@@ -145,11 +113,6 @@ export default function ExecutorsPage() {
           <Form.Item name="address" label="Адрес"><Input /></Form.Item>
           <Form.Item name="phone" label="Телефон"><Input /></Form.Item>
           <Form.Item name="email" label="Email" rules={[{ type: 'email' }]}><Input /></Form.Item>
-          {editing && (
-            <Form.Item name="isActive" label="Активен" valuePropName="checked">
-              <Switch />
-            </Form.Item>
-          )}
         </Form>
       </Modal>
     </Card>
