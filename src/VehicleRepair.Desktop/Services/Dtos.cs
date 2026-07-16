@@ -10,6 +10,7 @@ public class VehicleDto
     public string VehicleType { get; set; } = "";
     public string CustomerName { get; set; } = "";
     public string CustomerId { get; set; } = "";
+    public bool IsActive { get; set; } = true;
 }
 
 public class ExecutorDto

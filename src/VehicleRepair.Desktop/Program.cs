@@ -30,7 +30,7 @@ static class Program
 
         var auth = provider.GetRequiredService<AuthTokenService>();
         var api = provider.GetRequiredService<ApiClient>();
-        var loginForm = new LoginForm(api);
+        var loginForm = new LoginForm(api, auth);
 
         if (loginForm.ShowDialog() != DialogResult.OK)
             return;

@@ -74,7 +74,7 @@ public class MainForm : Form
     private void MnuLogout_Click(object? sender, EventArgs e)
     {
         _auth.Clear();
-        var login = new LoginForm(_api);
+        var login = new LoginForm(_api, _auth);
         if (login.ShowDialog() == DialogResult.OK)
         {
             // stay open — re-logged in

@@ -98,7 +98,7 @@ public class RepairReceiveForm : Form
             var vRes = await _api.GetAsync<List<VehicleDto>>("/vehicles");
             var rRes = await _api.GetAsync<List<RepairTypeDto>>("/repair-types");
 
-            _vehicles = vRes.Data ?? [];
+            _vehicles = (vRes.Data ?? []).Where(v => v.IsActive).ToList();
             _repairTypes = (rRes.Data ?? []).Where(r => r.IsActive).ToList();
 
             _cmbVehicle.DataSource = _vehicles;

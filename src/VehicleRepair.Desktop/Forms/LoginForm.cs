@@ -5,15 +5,17 @@ namespace VehicleRepair.Desktop.Forms;
 public class LoginForm : Form
 {
     private readonly ApiClient _api;
+    private readonly AuthTokenService _auth;
 
     private TextBox _txtLogin = null!;
     private TextBox _txtPassword = null!;
     private Button _btnLogin = null!;
     private Label _lblError = null!;
 
-    public LoginForm(ApiClient api)
+    public LoginForm(ApiClient api, AuthTokenService auth)
     {
         _api = api;
+        _auth = auth;
         InitializeComponent();
     }
 
@@ -76,6 +78,14 @@ public class LoginForm : Form
         try
         {
             await _api.LoginAsync(_txtLogin.Text.Trim(), _txtPassword.Text);
+
+            // Десктоп-клиент рассчитан на УК и Исполнителя — Заказчику в нём делать нечего.
+            if (_auth.Role == "Customer")
+            {
+                _auth.Clear();
+                throw new Exception("Заказчику вход в десктоп-приложение недоступен. Используйте веб-версию.");
+            }
+
             DialogResult = DialogResult.OK;
             Close();
         }
